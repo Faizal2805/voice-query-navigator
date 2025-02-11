@@ -21,6 +21,9 @@ const Index = () => {
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
 
+    // Show button immediately
+    setShowButton(true);
+
     // Typing animation
     const interval = setInterval(() => {
       if (index <= text.length) {
@@ -28,7 +31,6 @@ const Index = () => {
         index++;
       } else {
         clearInterval(interval);
-        setShowButton(true);
       }
     }, 100);
 
@@ -60,23 +62,27 @@ const Index = () => {
 
       {/* Homepage Section */}
       {currentSection === 'homepage' && (
-        <div className="flex items-center justify-center min-h-[80vh] px-4">
-          <div className="text-center max-w-[576px] w-full">
-            <Card className={`glass-effect p-8 mb-8 ${isMobile ? 'mx-4' : ''}`}>
-              <h1 className="text-[#1D4ED8] text-2xl font-medium transition-opacity duration-500">
-                {displayedText}
-                <span className="blinking-cursor">|</span>
-              </h1>
-            </Card>
-            {showButton && (
+        <div className="flex flex-col justify-between min-h-[80vh] px-4">
+          <div className="flex items-center justify-center flex-1">
+            <div className="text-center max-w-[576px] w-full">
+              <Card className={`glass-effect p-8 mb-8 ${isMobile ? 'mx-4' : ''}`}>
+                <h1 className="text-[#1D4ED8] text-2xl font-medium transition-opacity duration-500">
+                  {displayedText}
+                  <span className="blinking-cursor">|</span>
+                </h1>
+              </Card>
+            </div>
+          </div>
+          {showButton && (
+            <div className="text-center pb-8">
               <button
                 onClick={handleGetStarted}
                 className="bg-[#1D4ED8] text-white px-16 py-4 rounded-full text-xl pop-up hover:bg-blue-700 transition-colors"
               >
                 Get Started
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
