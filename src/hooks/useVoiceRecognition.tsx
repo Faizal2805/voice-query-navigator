@@ -1,6 +1,16 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+// Define the necessary types for the Web Speech API
+interface Window {
+  SpeechRecognition: typeof SpeechRecognition;
+  webkitSpeechRecognition: typeof SpeechRecognition;
+}
+
+interface SpeechRecognitionEvent {
+  results: SpeechRecognitionResultList;
+}
+
 interface VoiceRecognitionProps {
   onResult: (transcript: string) => void;
   onEnd?: () => void;
@@ -13,14 +23,15 @@ export const useVoiceRecognition = ({ onResult, onEnd, continuous = false }: Voi
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      // Use type assertion to handle the Speech Recognition API
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.continuous = continuous;
         recognition.interimResults = true;
         recognition.lang = 'en-US';
         
-        recognition.onresult = (event) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           const transcript = Array.from(event.results)
             .map(result => result[0])
             .map(result => result.transcript)
