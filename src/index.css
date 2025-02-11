@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,8 +9,6 @@
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
@@ -36,21 +35,34 @@
   }
 }
 
-.glass-morphism {
-  @apply bg-white/80 backdrop-blur-sm rounded-lg shadow-lg;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-@keyframes fadeIn {
-  from {
+@keyframes popUp {
+  0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: scale(0);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+.blinking-cursor {
+  font-weight: 100;
+  font-size: 2rem;
+  color: #1D4ED8;
+  animation: blink 1s infinite;
 }
+
+.pop-up {
+  animation: popUp 1s forwards;
+}
+
+.glass-effect {
+  @apply bg-white/30 backdrop-blur-[10px] rounded-lg shadow-lg;
+}
+
