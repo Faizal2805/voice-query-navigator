@@ -1,10 +1,24 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-// Define the necessary types for the Web Speech API
+// Define types for Web Speech API
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionInstance;
+}
+
 interface Window {
-  SpeechRecognition: typeof SpeechRecognition;
-  webkitSpeechRecognition: typeof SpeechRecognition;
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
 }
 
 interface SpeechRecognitionEvent {
@@ -19,7 +33,7 @@ interface VoiceRecognitionProps {
 
 export const useVoiceRecognition = ({ onResult, onEnd, continuous = false }: VoiceRecognitionProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
