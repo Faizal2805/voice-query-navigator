@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [currentSection, setCurrentSection] = useState('homepage');
@@ -10,6 +11,7 @@ const Index = () => {
   const [showButton, setShowButton] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const text = "I'm Eva, a virtual voice assistant!!";
@@ -55,11 +57,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div className="text-center pt-6">
-        <h1 className="text-xl font-bold text-[#1D4ED8]">EVA</h1>
-      </div>
-
       {/* Homepage Section */}
       {currentSection === 'homepage' && (
         <div className="flex flex-col justify-between min-h-[80vh] px-4">
@@ -96,6 +93,7 @@ const Index = () => {
             {showCards && (
               <>
                 <Card 
+                  onClick={() => navigate('/student-details')}
                   className="p-4 text-center transform transition-all duration-500 hover:shadow-lg cursor-pointer"
                   style={{
                     animation: 'popUp 1s forwards',
