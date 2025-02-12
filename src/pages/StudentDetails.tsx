@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -133,24 +132,22 @@ const StudentDetails = () => {
   return (
     <div className="min-h-screen">
       <div className="container flex flex-col items-center justify-center">
-        <p className="mt-32 mb-16 text-[#2d336b] text-2xl font-bold">
+        <p className="mt-32 mb-4 text-[#2d336b] text-2xl font-bold">
           {displayedText}
         </p>
-        <div className="flex flex-col items-center">
-          <button 
-            className="voice-button mb-8"
-            onClick={startListening}
-          >
-            <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
-              <div className="rainbow-container">
-                <div className="green"></div>
-                <div className="pink"></div>
-                <div className="blue"></div>
-              </div>
+        <p className="text-gray-600 text-center max-w-md mb-8">{outputText}</p>
+        <button 
+          className="voice-button"
+          onClick={startListening}
+        >
+          <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
+            <div className="rainbow-container">
+              <div className="green"></div>
+              <div className="pink"></div>
+              <div className="blue"></div>
             </div>
-          </button>
-          <p className="text-gray-600 text-center max-w-md">{outputText}</p>
-        </div>
+          </div>
+        </button>
       </div>
 
       {/* Bottom Card */}
@@ -158,13 +155,10 @@ const StudentDetails = () => {
         <Card className="rounded-t-[20px] border-b-0 h-[90px]">
           <div className="flex justify-around items-center mt-4">
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/page-1')}
               className="border-0 bg-white"
             >
               <ArrowLeft size={32} />
-            </button>
-            <button className="border-0 bg-white">
-              <X size={32} />
             </button>
             <button 
               onClick={() => setShowKeyboard(!showKeyboard)}
