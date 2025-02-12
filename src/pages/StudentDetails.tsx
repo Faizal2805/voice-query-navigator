@@ -42,14 +42,21 @@ const StudentDetails = () => {
       setIsListening(true);
       setOutputText('Listening...');
       
-      // Initialize speech recognition
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      // Initialize speech recognition with type checking
+      const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
+      
+      if (!SpeechRecognition) {
+        setOutputText('Speech recognition is not supported in your browser');
+        setIsListening(false);
+        return;
+      }
+
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'en-UK';
 
-      recognition.onresult = (event) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
@@ -61,7 +68,17 @@ const StudentDetails = () => {
         setIsListening(false);
       };
 
-      recognition.start();
+      recognition.onerror = () => {
+        setIsListening(false);
+        setOutputText('Error occurred during speech recognition');
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        setIsListening(false);
+        setOutputText('Error starting speech recognition');
+      }
     }
   };
 
