@@ -1,8 +1,9 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Keyboard } from 'lucide-react';
+import { ArrowLeft, Keyboard } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const StudentDetails = () => {
@@ -43,6 +44,7 @@ const StudentDetails = () => {
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);
       }
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech when component unmounts
     };
   }, []);
 
@@ -155,7 +157,10 @@ const StudentDetails = () => {
         <Card className="rounded-t-[20px] border-b-0 h-[90px]">
           <div className="flex justify-around items-center mt-4">
             <button 
-              onClick={() => navigate('/page-1')}
+              onClick={() => {
+                window.speechSynthesis.cancel();
+                navigate('/');
+              }}
               className="border-0 bg-white"
             >
               <ArrowLeft size={32} />

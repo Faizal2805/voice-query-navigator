@@ -36,10 +36,14 @@ const Index = () => {
       }
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
+    };
   }, []);
 
   const handleGetStarted = () => {
+    window.speechSynthesis.cancel(); // Cancel ongoing speech
     setCurrentSection('page-1');
     let index = 0;
     const text = "How can I assist you?";
