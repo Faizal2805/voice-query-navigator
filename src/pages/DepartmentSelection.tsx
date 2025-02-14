@@ -1,9 +1,9 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Keyboard } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from "@/components/ui/use-toast";
 
 const DepartmentSelection = () => {
   const [displayedText, setDisplayedText] = useState('');
@@ -15,7 +15,7 @@ const DepartmentSelection = () => {
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const text = "Which department and year does the person you are looking for study?";
+    const text = "Please tell me both the department and year. For example, 'Computer Science department, second year'";
     let index = 0;
     
     // Text-to-speech
@@ -93,6 +93,12 @@ const DepartmentSelection = () => {
             setIsListening(false);
             
             try {
+              // Show what we're processing
+              toast({
+                title: "Processing your request",
+                description: `Looking for: ${transcript}`,
+              });
+
               const response = await fetch('https://extract-dept.onrender.com/extract', {
                 method: 'POST',
                 headers: {
@@ -104,52 +110,70 @@ const DepartmentSelection = () => {
               const data = await response.json();
               
               if (!data || data.error) {
-                const errorMessage = "Please, provide a valid input";
+                const errorMessage = "Please mention both department and year clearly. For example, 'Computer Science department, second year'";
                 setOutputText(errorMessage);
                 const utterance = new SpeechSynthesisUtterance(errorMessage);
                 utterance.lang = 'en-UK';
                 utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
                 
-                setTimeout(() => {
-                  navigate('/');
-                }, 5000);
-              } else {
-                // Get stored student list and filter based on department and year
-                const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
-                const filteredStudents = studentsList.filter((student: any) => 
-                  student.department.toLowerCase() === data.department.toLowerCase() &&
-                  student.year.toString() === data.year.toString()
-                );
+                toast({
+                  variant: "destructive",
+                  title: "Information Missing",
+                  description: errorMessage,
+                });
+                return;
+              }
 
-                if (filteredStudents.length > 0) {
-                  const student = filteredStudents[0];
-                  const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
-                  
-                  setOutputText(message);
-                  const utterance = new SpeechSynthesisUtterance(message);
-                  utterance.lang = 'en-UK';
-                  utterance.rate = 0.9;
-                  window.speechSynthesis.speak(utterance);
-                } else {
-                  const errorMessage = "No student found with these details";
-                  setOutputText(errorMessage);
-                  const utterance = new SpeechSynthesisUtterance(errorMessage);
-                  utterance.lang = 'en-UK';
-                  utterance.rate = 0.9;
-                  window.speechSynthesis.speak(utterance);
-                }
+              // Get stored student list and filter based on department and year
+              const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+              const filteredStudents = studentsList.filter((student: any) => 
+                student.department.toLowerCase() === data.department.toLowerCase() &&
+                student.year.toString() === data.year.toString()
+              );
+
+              if (filteredStudents.length > 0) {
+                const student = filteredStudents[0];
+                const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+                
+                setOutputText(message);
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.lang = 'en-UK';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+
+                toast({
+                  title: "Student Found",
+                  description: message,
+                });
+              } else {
+                const errorMessage = "No student found with these details";
+                setOutputText(errorMessage);
+                const utterance = new SpeechSynthesisUtterance(errorMessage);
+                utterance.lang = 'en-UK';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+
+                toast({
+                  variant: "destructive",
+                  title: "No Match",
+                  description: errorMessage,
+                });
               }
             } catch (error) {
               console.error('Error processing department/year:', error);
-              const errorMessage = "Please, provide a valid input";
+              const errorMessage = "Please mention both department and year clearly. For example, 'Computer Science department, second year'";
               setOutputText(errorMessage);
               const utterance = new SpeechSynthesisUtterance(errorMessage);
+              utterance.lang = 'en-UK';
+              utterance.rate = 0.9;
               window.speechSynthesis.speak(utterance);
-              
-              setTimeout(() => {
-                navigate('/');
-              }, 5000);
+
+              toast({
+                variant: "destructive",
+                title: "Error",
+                description: errorMessage,
+              });
             }
           }
         }, 3000);
