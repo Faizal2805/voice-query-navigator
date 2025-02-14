@@ -6,19 +6,24 @@ import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [displayedText, setDisplayedText] = useState('');
+  const [assistText, setAssistText] = useState('');
+  const [showButton, setShowButton] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
   useEffect(() => {
-    const text = "How can I assist you?";
+    const text = "I'm Eva, a virtual voice assistant!!";
     let index = 0;
     
     // Text-to-speech
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance("I am Eva, a virtual voice assistant");
     utterance.lang = 'en-UK';
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
+
+    // Show button immediately
+    setShowButton(true);
 
     // Typing animation
     const interval = setInterval(() => {
@@ -27,15 +32,37 @@ const Index = () => {
         index++;
       } else {
         clearInterval(interval);
-        setShowCards(true);
+        handleGetStarted(); // Automatically transition to assistance text
       }
-    }, 70);
+    }, 100);
 
     return () => {
       clearInterval(interval);
       window.speechSynthesis.cancel();
     };
   }, []);
+
+  const handleGetStarted = () => {
+    window.speechSynthesis.cancel();
+    let index = 0;
+    const text = "How can I assist you?";
+    
+    // Text-to-speech for assistance message
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-UK';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+    
+    const interval = setInterval(() => {
+      if (index <= text.length) {
+        setAssistText(text.slice(0, index));
+        index++;
+      } else {
+        clearInterval(interval);
+        setShowCards(true);
+      }
+    }, 70);
+  };
 
   return (
     <div className="min-h-screen">
@@ -44,7 +71,12 @@ const Index = () => {
           <Card className={`glass-effect p-8 ${isMobile ? 'mx-4' : ''}`}>
             <h1 className="text-[#2d336b] text-2xl font-bold">
               {displayedText}
-              <span className="blinking-cursor">|</span>
+              {assistText && (
+                <div className="mt-4">
+                  {assistText}
+                  <span className="blinking-cursor">|</span>
+                </div>
+              )}
             </h1>
           </Card>
         </div>
@@ -53,7 +85,10 @@ const Index = () => {
           {showCards && (
             <>
               <Card 
-                onClick={() => navigate('/student-details')}
+                onClick={() => {
+                  window.speechSynthesis.cancel();
+                  navigate('/student-details');
+                }}
                 className="p-4 text-center transform transition-all duration-500 hover:shadow-lg cursor-pointer animate-fade-in"
               >
                 <h2 className="text-[#2d336b] text-xl font-medium">Student-Details</h2>
