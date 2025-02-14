@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 const Index = () => {
+  const [currentSection, setCurrentSection] = useState('homepage');
   const [displayedText, setDisplayedText] = useState('');
   const [assistText, setAssistText] = useState('');
-  const [showGetStarted, setShowGetStarted] = useState(false);
+  const [showButton, setShowButton] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -16,10 +16,6 @@ const Index = () => {
   useEffect(() => {
     const text = "I'm Eva, a virtual voice assistant!!";
     let index = 0;
-    const words = text.split(' ');
-    let wordIndex = 0;
-    let currentWord = words[wordIndex];
-    let letterIndex = 0;
     
     // Text-to-speech
     const utterance = new SpeechSynthesisUtterance("I am Eva, a virtual voice assistant");
@@ -27,43 +23,31 @@ const Index = () => {
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
 
-    // Typing animation with word-by-word approach
+    // Show button immediately
+    setShowButton(true);
+
+    // Typing animation
     const interval = setInterval(() => {
-      if (wordIndex < words.length) {
-        if (letterIndex < currentWord.length) {
-          setDisplayedText(prev => prev + currentWord[letterIndex]);
-          letterIndex++;
-        } else {
-          setDisplayedText(prev => prev + ' ');
-          wordIndex++;
-          letterIndex = 0;
-          currentWord = words[wordIndex];
-        }
+      if (index <= text.length) {
+        setDisplayedText(text.slice(0, index));
+        index++;
       } else {
         clearInterval(interval);
-        setShowGetStarted(true);
       }
     }, 100);
 
     return () => {
       clearInterval(interval);
-      window.speechSynthesis.cancel();
+      window.speechSynthesis.cancel(); // Cancel any ongoing speech
     };
   }, []);
 
   const handleGetStarted = () => {
-    window.speechSynthesis.cancel();
-    setShowGetStarted(false);
+    window.speechSynthesis.cancel(); // Cancel ongoing speech
+    setCurrentSection('page-1');
     let index = 0;
     const text = "How can I assist you?";
     
-    // Text-to-speech for assistance message
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-UK';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-    
-    // Typing animation for assistance message
     const interval = setInterval(() => {
       if (index <= text.length) {
         setAssistText(text.slice(0, index));
@@ -77,52 +61,69 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-        <div className="text-center max-w-[576px] w-full mb-8">
-          <div className="blurred-box">
-            <h1 className="intro-text" style={{ opacity: displayedText ? 1 : 0 }}>
-              {displayedText}
-              <span className="blinking-cursor">|</span>
-            </h1>
-            {assistText && (
-              <h1 className="assist-text mt-4">
-                {assistText}
-                <span className="blinking-cursor">|</span>
-              </h1>
+      {/* Homepage Section */}
+      {currentSection === 'homepage' && (
+        <div className="flex flex-col justify-between min-h-[80vh] px-4">
+          <div className="flex items-center justify-center flex-1">
+            <div className="text-center max-w-[576px] w-full">
+              <Card className={`glass-effect p-8 mb-8 ${isMobile ? 'mx-4' : ''}`}>
+                <h1 className="text-[#1D4ED8] text-2xl font-medium transition-opacity duration-500">
+                  {displayedText}
+                  <span className="blinking-cursor">|</span>
+                </h1>
+              </Card>
+            </div>
+          </div>
+          {showButton && (
+            <div className="text-center pb-8">
+              <button
+                onClick={handleGetStarted}
+                className="bg-[#1D4ED8] text-white px-16 py-4 rounded-full text-xl pop-up hover:bg-blue-700 transition-colors"
+              >
+                Get Started
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Page 1 Section */}
+      {currentSection === 'page-1' && (
+        <div className={`flex flex-col items-start ${isMobile ? 'p-4' : 'p-12'} max-w-[576px] mx-auto mt-20`}>
+          <h1 className="text-[#2d336b] text-2xl font-bold mb-10">
+            {assistText}
+          </h1>
+          <div className="grid grid-cols-1 gap-6 w-full">
+            {showCards && (
+              <>
+                <Card 
+                  onClick={() => navigate('/student-details')}
+                  className="p-4 text-center transform transition-all duration-500 hover:shadow-lg cursor-pointer"
+                  style={{
+                    animation: 'popUp 1s forwards',
+                    opacity: 0,
+                    transform: 'scale(0)',
+                    animationDelay: '0s'
+                  }}
+                >
+                  <h2 className="text-[#2d336b] text-xl font-medium">Student-Details</h2>
+                </Card>
+                <Card 
+                  className="p-4 text-center transform transition-all duration-500 hover:shadow-lg cursor-pointer"
+                  style={{
+                    animation: 'popUp 1s forwards',
+                    opacity: 0,
+                    transform: 'scale(0)',
+                    animationDelay: '0.5s'
+                  }}
+                >
+                  <h2 className="text-[#2d336b] text-xl font-medium">Staff-Details</h2>
+                </Card>
+              </>
             )}
           </div>
         </div>
-
-        {showGetStarted && (
-          <Button
-            onClick={handleGetStarted}
-            className="get-started-btn"
-          >
-            Get Started
-          </Button>
-        )}
-
-        {showCards && (
-          <div className="grid grid-cols-1 gap-6 w-full max-w-[576px] mt-10">
-            <Card 
-              onClick={() => {
-                window.speechSynthesis.cancel();
-                navigate('/student-details');
-              }}
-              className="animated-card cursor-pointer"
-              style={{ animationDelay: '0s' }}
-            >
-              <h2 className="text-[#2d336b] text-xl font-medium">Student-Details</h2>
-            </Card>
-            <Card 
-              className="animated-card cursor-pointer"
-              style={{ animationDelay: '0.5s' }}
-            >
-              <h2 className="text-[#2d336b] text-xl font-medium">Staff-Details</h2>
-            </Card>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
