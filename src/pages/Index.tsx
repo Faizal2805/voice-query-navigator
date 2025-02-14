@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [assistText, setAssistText] = useState('');
   const [showButton, setShowButton] = useState(false);
   const [showCards, setShowCards] = useState(false);
+  const [showGetStarted, setShowGetStarted] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   
@@ -22,9 +24,6 @@ const Index = () => {
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
 
-    // Show button immediately
-    setShowButton(true);
-
     // Typing animation
     const interval = setInterval(() => {
       if (index <= text.length) {
@@ -32,7 +31,7 @@ const Index = () => {
         index++;
       } else {
         clearInterval(interval);
-        handleGetStarted(); // Automatically transition to assistance text
+        setShowGetStarted(true);
       }
     }, 100);
 
@@ -44,6 +43,7 @@ const Index = () => {
 
   const handleGetStarted = () => {
     window.speechSynthesis.cancel();
+    setShowGetStarted(false);
     let index = 0;
     const text = "How can I assist you?";
     
@@ -80,6 +80,15 @@ const Index = () => {
             </h1>
           </Card>
         </div>
+
+        {showGetStarted && (
+          <Button
+            onClick={handleGetStarted}
+            className="bg-[#1D4ED8] hover:bg-[#1e40af] text-white px-8 py-2 rounded-lg text-lg font-semibold transition-all duration-300 animate-fade-in"
+          >
+            Get Started
+          </Button>
+        )}
 
         <div className="grid grid-cols-1 gap-6 w-full max-w-[576px]">
           {showCards && (
