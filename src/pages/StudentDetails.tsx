@@ -1,7 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Keyboard } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ const StudentDetails = () => {
   const [isListening, setIsListening] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [outputText, setOutputText] = useState('');
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,91 +42,71 @@ const StudentDetails = () => {
       if (silenceTimeoutRef.current) {
         clearTimeout(silenceTimeoutRef.current);
       }
-      window.speechSynthesis.cancel(); // Cancel any ongoing speech when component unmounts
+      window.speechSynthesis.cancel();
     };
   }, []);
 
-  const resetSilenceTimeout = () => {
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-    }
-    silenceTimeoutRef.current = setTimeout(() => {
-      if (recognitionRef.current && isListening) {
-        recognitionRef.current.stop();
-        setIsListening(false);
-      }
-    }, 2000);
-  };
-
-  const stopRecognition = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-    }
-    setIsListening(false);
-  };
-
   const startListening = () => {
     if (isListening) {
-      stopRecognition();
-      return;
-    }
-
-    setIsListening(true);
-    setOutputText('Listening...');
-    
-    const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
-    
-    if (!SpeechRecognition) {
-      setOutputText('Speech recognition is not supported in your browser');
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       setIsListening(false);
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-UK';
+    // Start recognition after 1 second
+    setTimeout(() => {
+      setIsListening(true);
+      setOutputText('Listening...');
+      
+      const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
+      
+      if (!SpeechRecognition) {
+        setOutputText('Speech recognition is not supported in your browser');
+        setIsListening(false);
+        return;
+      }
 
-    recognitionRef.current = recognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-UK';
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let transcript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+      recognitionRef.current = recognition;
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
         setOutputText(transcript);
+        
+        // Reset silence timeout
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current);
+        }
+        
+        silenceTimeoutRef.current = setTimeout(() => {
+          if (recognitionRef.current) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+            navigate('/confirmation'); // We'll implement this page next
+          }
+        }, 3000);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        setIsListening(false);
       }
-      resetSilenceTimeout();
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
-      }
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      setOutputText('Error occurred during speech recognition');
-    };
-
-    try {
-      recognition.start();
-      resetSilenceTimeout();
-    } catch (error) {
-      setIsListening(false);
-      setOutputText('Error starting speech recognition');
-    }
-  };
-
-  const handleKeyboardInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setOutputText(e.currentTarget.value);
-      e.currentTarget.value = '';
-    }
+    }, 1000);
   };
 
   return (
@@ -139,6 +117,7 @@ const StudentDetails = () => {
         </p>
         <p className="text-gray-600 text-center max-w-md mb-8">{outputText}</p>
         <button 
+          id="Start-Btn"
           className="voice-button"
           onClick={startListening}
         >
@@ -152,7 +131,6 @@ const StudentDetails = () => {
         </button>
       </div>
 
-      {/* Bottom Card */}
       <div className="fixed bottom-0 left-0 right-0 bg-white">
         <Card className="rounded-t-[20px] border-b-0 h-[90px]">
           <div className="flex justify-around items-center mt-4">
@@ -178,7 +156,12 @@ const StudentDetails = () => {
                 type="text"
                 placeholder="Ask me anything..."
                 className="keyboard-input"
-                onKeyDown={handleKeyboardInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setOutputText(e.currentTarget.value);
+                    e.currentTarget.value = '';
+                  }
+                }}
               />
             </div>
           )}
