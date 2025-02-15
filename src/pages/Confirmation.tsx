@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Keyboard } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-const StudentDetails = () => {
+const Confirmation = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
@@ -15,7 +15,7 @@ const StudentDetails = () => {
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const text = "Who are you looking for?";
+    const text = "Kindly tell the full name of the person you are looking for...";
     let index = 0;
     
     // Text-to-speech
@@ -85,11 +85,51 @@ const StudentDetails = () => {
           clearTimeout(silenceTimeoutRef.current);
         }
         
-        silenceTimeoutRef.current = setTimeout(() => {
+        silenceTimeoutRef.current = setTimeout(async () => {
           if (recognitionRef.current) {
             recognitionRef.current.stop();
             setIsListening(false);
-            navigate('/confirmation');
+            
+            try {
+              const response = await fetch('https://voice-search-backend.onrender.com/process_voice', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: transcript }),
+              });
+
+              const data = await response.json();
+              
+              if (!data || data.error) {
+                const errorMessage = "Please, provide a valid input";
+                setOutputText(errorMessage);
+                const utterance = new SpeechSynthesisUtterance(errorMessage);
+                utterance.lang = 'en-UK';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                
+                setTimeout(() => {
+                  navigate('/');
+                }, 5000);
+              } else {
+                // Store the student list in sessionStorage
+                sessionStorage.setItem('studentsList', JSON.stringify(data));
+                navigate('/department-selection');
+              }
+            } catch (error) {
+              console.error('Error processing voice:', error);
+              const errorMessage = "Please, provide a valid input";
+              setOutputText(errorMessage);
+              const utterance = new SpeechSynthesisUtterance(errorMessage);
+              utterance.lang = 'en-UK';
+              utterance.rate = 0.9;
+              window.speechSynthesis.speak(utterance);
+              
+              setTimeout(() => {
+                navigate('/');
+              }, 5000);
+            }
           }
         }, 3000);
       };
@@ -135,7 +175,7 @@ const StudentDetails = () => {
             <button 
               onClick={() => {
                 window.speechSynthesis.cancel();
-                navigate('/');
+                navigate('/student-details');
               }}
               className="border-0 bg-white"
             >
@@ -169,4 +209,4 @@ const StudentDetails = () => {
   );
 };
 
-export default StudentDetails;
+export default Confirmation;

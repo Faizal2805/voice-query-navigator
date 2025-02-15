@@ -4,18 +4,20 @@ import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Keyboard } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-const StudentDetails = () => {
+const DepartmentSelection = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [outputText, setOutputText] = useState('');
+  const [showOkButton, setShowOkButton] = useState(false);
   const navigate = useNavigate();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const text = "Who are you looking for?";
+    const text = "Which department and year does the person you are looking for study?";
     let index = 0;
     
     // Text-to-speech
@@ -85,11 +87,83 @@ const StudentDetails = () => {
           clearTimeout(silenceTimeoutRef.current);
         }
         
-        silenceTimeoutRef.current = setTimeout(() => {
+        silenceTimeoutRef.current = setTimeout(async () => {
           if (recognitionRef.current) {
             recognitionRef.current.stop();
             setIsListening(false);
-            navigate('/confirmation');
+            
+            try {
+              const response = await fetch('https://extract-dept.onrender.com/extract', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: transcript }),
+              });
+
+              const data = await response.json();
+              
+              if (!data || data.error) {
+                const errorMessage = "Please, provide a valid input";
+                setOutputText(errorMessage);
+                const utterance = new SpeechSynthesisUtterance(errorMessage);
+                utterance.lang = 'en-UK';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                
+                setTimeout(() => {
+                  navigate('/');
+                }, 5000);
+              } else {
+                // Get stored student list and filter based on department and year
+                const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+                const filteredStudents = studentsList.filter((student: any) => 
+                  student.department.toLowerCase() === data.department.toLowerCase() &&
+                  student.year.toString() === data.year.toString()
+                );
+
+                if (filteredStudents.length > 0) {
+                  const student = filteredStudents[0];
+                  const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+                  
+                  // Display and speak the message character by character
+                  let index = 0;
+                  const interval = setInterval(() => {
+                    if (index <= message.length) {
+                      setOutputText(message.slice(0, index));
+                      index++;
+                    } else {
+                      clearInterval(interval);
+                      setShowOkButton(true);
+                    }
+                  }, 70);
+
+                  const utterance = new SpeechSynthesisUtterance(message);
+                  utterance.lang = 'en-UK';
+                  utterance.rate = 0.9;
+                  window.speechSynthesis.speak(utterance);
+                } else {
+                  const errorMessage = "No student found with these details";
+                  setOutputText(errorMessage);
+                  const utterance = new SpeechSynthesisUtterance(errorMessage);
+                  utterance.lang = 'en-UK';
+                  utterance.rate = 0.9;
+                  window.speechSynthesis.speak(utterance);
+                }
+              }
+            } catch (error) {
+              console.error('Error processing department/year:', error);
+              const errorMessage = "Please, provide a valid input";
+              setOutputText(errorMessage);
+              const utterance = new SpeechSynthesisUtterance(errorMessage);
+              utterance.lang = 'en-UK';
+              utterance.rate = 0.9;
+              window.speechSynthesis.speak(utterance);
+              
+              setTimeout(() => {
+                navigate('/');
+              }, 5000);
+            }
           }
         }, 3000);
       };
@@ -127,6 +201,16 @@ const StudentDetails = () => {
             </div>
           </div>
         </button>
+
+        {showOkButton && (
+          <Button
+            id="OK-Btn"
+            onClick={() => navigate('/')}
+            className="mt-8 bg-[#1D4ED8] hover:bg-[#1e40af] text-white px-8 py-2 rounded-lg text-lg font-semibold transition-all duration-300"
+          >
+            OK
+          </Button>
+        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white">
@@ -135,7 +219,7 @@ const StudentDetails = () => {
             <button 
               onClick={() => {
                 window.speechSynthesis.cancel();
-                navigate('/');
+                navigate('/confirmation');
               }}
               className="border-0 bg-white"
             >
@@ -169,4 +253,4 @@ const StudentDetails = () => {
   );
 };
 
-export default StudentDetails;
+export default DepartmentSelection;
