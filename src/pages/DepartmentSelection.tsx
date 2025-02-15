@@ -1,19 +1,16 @@
-import { useEffect, useState, useRef } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Keyboard } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const DepartmentSelection = () => {
   const [displayedText, setDisplayedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(false);
-  const [outputText, setOutputText] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [showOkButton, setShowOkButton] = useState(false);
   const navigate = useNavigate();
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const text = "Which department and year does the person you are looking for study?";
@@ -37,139 +34,95 @@ const DepartmentSelection = () => {
 
     return () => {
       clearInterval(interval);
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
-      }
       window.speechSynthesis.cancel();
     };
   }, []);
 
-  const startListening = () => {
-    if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setIsListening(false);
-      return;
-    }
+  const handleSearch = async () => {
+    if (!searchInput.trim()) return;
 
-    setTimeout(() => {
-      setIsListening(true);
-      setOutputText('Listening...');
-      
-      const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
-      
-      if (!SpeechRecognition) {
-        setOutputText('Speech recognition is not supported in your browser');
-        setIsListening(false);
+    navigate('/details-fetching');
+    
+    try {
+      const response = await fetch('https://extract-dept.onrender.com/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: searchInput }),
+      });
+
+      if (response.status === 400) {
+        navigate('/error', { state: { returnPath: '/department-selection' } });
         return;
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-UK';
+      const data = await response.json();
+      
+      if (!data || data.error) {
+        navigate('/error', { state: { returnPath: '/department-selection' } });
+      } else {
+        const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+        const filteredStudents = studentsList.filter((student: any) => 
+          student.department.toLowerCase() === data.department.toLowerCase() &&
+          student.year.toString() === data.year.toString()
+        );
 
-      recognitionRef.current = recognition;
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+        if (filteredStudents.length > 0) {
+          const student = filteredStudents[0];
+          const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+          displayCharacterByCharacter(message);
+        } else {
+          navigate('/error', { state: { returnPath: '/department-selection' } });
         }
-        setOutputText(transcript);
-        
-        if (silenceTimeoutRef.current) {
-          clearTimeout(silenceTimeoutRef.current);
-        }
-        
-        silenceTimeoutRef.current = setTimeout(async () => {
-          if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            setIsListening(false);
-            
-            navigate('/details-fetching');
-            
-            try {
-              const response = await fetch('https://extract-dept.onrender.com/extract', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: transcript }),
-              });
-
-              const data = await response.json();
-              
-              if (!data || data.error) {
-                const errorMessage = "Please, provide a valid input";
-                sessionStorage.setItem('error_message', errorMessage);
-                navigate('/');
-              } else {
-                // Get stored student list and filter based on department and year
-                const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
-                const filteredStudents = studentsList.filter((student: any) => 
-                  student.department.toLowerCase() === data.department.toLowerCase() &&
-                  student.year.toString() === data.year.toString()
-                );
-
-                if (filteredStudents.length > 0) {
-                  const student = filteredStudents[0];
-                  const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
-                  sessionStorage.setItem('success_message', message);
-                  navigate('/department-selection');
-                } else {
-                  const errorMessage = "No student found with these details";
-                  sessionStorage.setItem('error_message', errorMessage);
-                  navigate('/');
-                }
-              }
-            } catch (error) {
-              console.error('Error processing department/year:', error);
-              const errorMessage = "Please, provide a valid input";
-              sessionStorage.setItem('error_message', errorMessage);
-              navigate('/');
-            }
-          }
-        }, 3000);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      try {
-        recognition.start();
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-        setIsListening(false);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Error processing department/year:', error);
+      navigate('/error', { state: { returnPath: '/department-selection' } });
+    }
+  };
+
+  const displayCharacterByCharacter = (message: string) => {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index <= message.length) {
+        setDisplayedText(message.slice(0, index));
+        index++;
+      } else {
+        clearInterval(interval);
+        setShowOkButton(true);
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'en-UK';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }, 70);
   };
 
   return (
     <div className="min-h-screen">
       <div className="container flex flex-col items-center justify-center">
-        <p className="mt-32 mb-4 text-[#2d336b] text-2xl font-bold">
+        <p className="mt-32 mb-8 text-[#2d336b] text-2xl font-bold">
           {displayedText}
         </p>
-        <p className="text-gray-600 text-center max-w-md mb-8">{outputText}</p>
-        <button 
-          id="Start-Btn"
-          className="voice-button"
-          onClick={startListening}
-        >
-          <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
-            <div className="rainbow-container">
-              <div className="green"></div>
-              <div className="pink"></div>
-              <div className="blue"></div>
-            </div>
+        {!showOkButton && (
+          <div className="flex gap-2 w-full max-w-md px-4">
+            <Input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Enter department and year..."
+              className="shadow-lg rounded-lg text-lg py-6"
+            />
+            <Button
+              onClick={handleSearch}
+              className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6"
+            >
+              <Search className="w-5 h-5" />
+            </Button>
           </div>
-        </button>
+        )}
 
         {showOkButton && (
           <Button
@@ -194,28 +147,7 @@ const DepartmentSelection = () => {
             >
               <ArrowLeft size={32} />
             </button>
-            <button 
-              onClick={() => setShowKeyboard(!showKeyboard)}
-              className="border-0 bg-white"
-            >
-              <Keyboard size={32} />
-            </button>
           </div>
-          {showKeyboard && (
-            <div className="bg-white">
-              <Input
-                type="text"
-                placeholder="Ask me anything..."
-                className="keyboard-input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setOutputText(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
-          )}
         </Card>
       </div>
     </div>

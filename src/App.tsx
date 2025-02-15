@@ -9,6 +9,7 @@ import StudentDetails from "./pages/StudentDetails";
 import Confirmation from "./pages/Confirmation";
 import DetailsFetching from "./pages/DetailsFetching";
 import DepartmentSelection from "./pages/DepartmentSelection";
+import ErrorPage from "./pages/ErrorPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/details-fetching" element={<DetailsFetching />} />
           <Route path="/department-selection" element={<DepartmentSelection />} />
+          <Route path="/error" element={<ErrorPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

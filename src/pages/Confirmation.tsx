@@ -1,17 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Keyboard } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const Confirmation = () => {
   const [displayedText, setDisplayedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(false);
-  const [outputText, setOutputText] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const navigate = useNavigate();
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const text = "Kindly tell the full name of the person you are looking for...";
@@ -35,125 +33,65 @@ const Confirmation = () => {
 
     return () => {
       clearInterval(interval);
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (silenceTimeoutRef.current) {
-        clearTimeout(silenceTimeoutRef.current);
-      }
       window.speechSynthesis.cancel();
     };
   }, []);
 
-  const startListening = () => {
-    if (isListening) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setIsListening(false);
-      return;
-    }
+  const handleSearch = async () => {
+    if (!searchInput.trim()) return;
 
-    setTimeout(() => {
-      setIsListening(true);
-      setOutputText('Listening...');
-      
-      const SpeechRecognition = (window.SpeechRecognition || window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
-      
-      if (!SpeechRecognition) {
-        setOutputText('Speech recognition is not supported in your browser');
-        setIsListening(false);
+    navigate('/details-fetching');
+    
+    try {
+      const response = await fetch('https://voice-search-backend.onrender.com/process_voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: searchInput }),
+      });
+
+      if (response.status === 404) {
+        navigate('/error', { state: { returnPath: '/confirmation' } });
         return;
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-UK';
-
-      recognitionRef.current = recognition;
-
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        setOutputText(transcript);
-        
-        if (silenceTimeoutRef.current) {
-          clearTimeout(silenceTimeoutRef.current);
-        }
-        
-        silenceTimeoutRef.current = setTimeout(async () => {
-          if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            setIsListening(false);
-            
-            navigate('/details-fetching');
-            
-            try {
-              const response = await fetch('https://voice-search-backend.onrender.com/process_voice', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: transcript }),
-              });
-
-              const data = await response.json();
-              
-              if (!data || data.error) {
-                const errorMessage = "Please, provide a valid input";
-                sessionStorage.setItem('error_message', errorMessage);
-                navigate('/');
-              } else {
-                // Store the student list in sessionStorage
-                sessionStorage.setItem('studentsList', JSON.stringify(data));
-                navigate('/department-selection');
-              }
-            } catch (error) {
-              console.error('Error processing voice:', error);
-              const errorMessage = "Please, provide a valid input";
-              sessionStorage.setItem('error_message', errorMessage);
-              navigate('/');
-            }
-          }
-        }, 3000);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      try {
-        recognition.start();
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-        setIsListening(false);
+      const data = await response.json();
+      
+      if (!data || data.error) {
+        navigate('/error', { state: { returnPath: '/confirmation' } });
+      } else {
+        sessionStorage.setItem('studentsList', JSON.stringify(data));
+        navigate('/department-selection');
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Error processing search:', error);
+      navigate('/error', { state: { returnPath: '/confirmation' } });
+    }
   };
 
   return (
     <div className="min-h-screen">
       <div className="container flex flex-col items-center justify-center">
-        <p className="mt-32 mb-4 text-[#2d336b] text-2xl font-bold">
+        <p className="mt-32 mb-8 text-[#2d336b] text-2xl font-bold">
           {displayedText}
         </p>
-        <p className="text-gray-600 text-center max-w-md mb-8">{outputText}</p>
-        <button 
-          id="Start-Btn"
-          className="voice-button"
-          onClick={startListening}
-        >
-          <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
-            <div className="rainbow-container">
-              <div className="green"></div>
-              <div className="pink"></div>
-              <div className="blue"></div>
-            </div>
-          </div>
-        </button>
+        <div className="flex gap-2 w-full max-w-md px-4">
+          <Input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Enter name to search..."
+            className="shadow-lg rounded-lg text-lg py-6"
+          />
+          <Button
+            onClick={handleSearch}
+            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6"
+          >
+            <Search className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white">
@@ -168,28 +106,7 @@ const Confirmation = () => {
             >
               <ArrowLeft size={32} />
             </button>
-            <button 
-              onClick={() => setShowKeyboard(!showKeyboard)}
-              className="border-0 bg-white"
-            >
-              <Keyboard size={32} />
-            </button>
           </div>
-          {showKeyboard && (
-            <div className="bg-white">
-              <Input
-                type="text"
-                placeholder="Ask me anything..."
-                className="keyboard-input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setOutputText(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
-          )}
         </Card>
       </div>
     </div>
