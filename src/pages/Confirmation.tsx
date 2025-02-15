@@ -51,14 +51,9 @@ const Confirmation = () => {
         body: JSON.stringify({ text: searchInput }),
       });
 
-      if (response.status === 404) {
-        navigate('/error', { state: { returnPath: '/confirmation' } });
-        return;
-      }
-
       const data = await response.json();
       
-      if (!data || data.error) {
+      if (data.length === 0) {
         navigate('/error', { state: { returnPath: '/confirmation' } });
       } else {
         sessionStorage.setItem('studentsList', JSON.stringify(data));

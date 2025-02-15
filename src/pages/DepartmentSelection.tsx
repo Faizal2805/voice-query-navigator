@@ -12,7 +12,7 @@ const DepartmentSelection = () => {
   const [showOkButton, setShowOkButton] = useState(false);
   const navigate = useNavigate();
 
-  const yearMapping: Record<string, string> = {
+  const yearMapping = {
     "I": "FIRSTYEAR",
     "II": "SECONDYEAR",
     "III": "THIRDYEAR",
@@ -119,7 +119,7 @@ const DepartmentSelection = () => {
   return (
     <div className="min-h-screen">
       <div className="container flex flex-col items-center justify-center">
-        <p className="mt-32 mb-8 text-[#2d336b] text-2xl font-bold">
+        <p className="mt-32 mb-8 text-[#2d336b] text-2xl font-bold text-balance whitespace-pre-line">
           {displayedText}
         </p>
         {!showOkButton && (
