@@ -12,6 +12,13 @@ const DepartmentSelection = () => {
   const [showOkButton, setShowOkButton] = useState(false);
   const navigate = useNavigate();
 
+  const yearMapping: Record<string, string> = {
+    "I": "FIRSTYEAR",
+    "II": "SECONDYEAR",
+    "III": "THIRDYEAR",
+    "IV": "FOURTHYEAR"
+  };
+
   useEffect(() => {
     const text = "Which department and year does the person you are looking for study?";
     let index = 0;
@@ -63,14 +70,24 @@ const DepartmentSelection = () => {
         navigate('/error', { state: { returnPath: '/department-selection' } });
       } else {
         const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+        const mappedYear = yearMapping[data.year] || data.year;
+        
         const filteredStudents = studentsList.filter((student: any) => 
           student.department.toLowerCase() === data.department.toLowerCase() &&
-          student.year.toString() === data.year.toString()
+          student.year === mappedYear
         );
 
         if (filteredStudents.length > 0) {
-          const student = filteredStudents[0];
-          const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+          // Display results for all matching students
+          let message = '';
+          if (filteredStudents.length === 1) {
+            const student = filteredStudents[0];
+            message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+          } else {
+            message = filteredStudents.map((student: any) => 
+              `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`
+            ).join('\n');
+          }
           displayCharacterByCharacter(message);
         } else {
           navigate('/error', { state: { returnPath: '/department-selection' } });
