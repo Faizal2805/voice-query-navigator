@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -90,6 +89,8 @@ const Confirmation = () => {
             recognitionRef.current.stop();
             setIsListening(false);
             
+            navigate('/details-fetching');
+            
             try {
               const response = await fetch('https://voice-search-backend.onrender.com/process_voice', {
                 method: 'POST',
@@ -103,15 +104,8 @@ const Confirmation = () => {
               
               if (!data || data.error) {
                 const errorMessage = "Please, provide a valid input";
-                setOutputText(errorMessage);
-                const utterance = new SpeechSynthesisUtterance(errorMessage);
-                utterance.lang = 'en-UK';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-                
-                setTimeout(() => {
-                  navigate('/');
-                }, 5000);
+                sessionStorage.setItem('error_message', errorMessage);
+                navigate('/');
               } else {
                 // Store the student list in sessionStorage
                 sessionStorage.setItem('studentsList', JSON.stringify(data));
@@ -120,15 +114,8 @@ const Confirmation = () => {
             } catch (error) {
               console.error('Error processing voice:', error);
               const errorMessage = "Please, provide a valid input";
-              setOutputText(errorMessage);
-              const utterance = new SpeechSynthesisUtterance(errorMessage);
-              utterance.lang = 'en-UK';
-              utterance.rate = 0.9;
-              window.speechSynthesis.speak(utterance);
-              
-              setTimeout(() => {
-                navigate('/');
-              }, 5000);
+              sessionStorage.setItem('error_message', errorMessage);
+              navigate('/');
             }
           }
         }, 3000);

@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -92,6 +91,8 @@ const DepartmentSelection = () => {
             recognitionRef.current.stop();
             setIsListening(false);
             
+            navigate('/details-fetching');
+            
             try {
               const response = await fetch('https://extract-dept.onrender.com/extract', {
                 method: 'POST',
@@ -105,15 +106,8 @@ const DepartmentSelection = () => {
               
               if (!data || data.error) {
                 const errorMessage = "Please, provide a valid input";
-                setOutputText(errorMessage);
-                const utterance = new SpeechSynthesisUtterance(errorMessage);
-                utterance.lang = 'en-UK';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-                
-                setTimeout(() => {
-                  navigate('/');
-                }, 5000);
+                sessionStorage.setItem('error_message', errorMessage);
+                navigate('/');
               } else {
                 // Get stored student list and filter based on department and year
                 const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
@@ -125,44 +119,19 @@ const DepartmentSelection = () => {
                 if (filteredStudents.length > 0) {
                   const student = filteredStudents[0];
                   const message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
-                  
-                  // Display and speak the message character by character
-                  let index = 0;
-                  const interval = setInterval(() => {
-                    if (index <= message.length) {
-                      setOutputText(message.slice(0, index));
-                      index++;
-                    } else {
-                      clearInterval(interval);
-                      setShowOkButton(true);
-                    }
-                  }, 70);
-
-                  const utterance = new SpeechSynthesisUtterance(message);
-                  utterance.lang = 'en-UK';
-                  utterance.rate = 0.9;
-                  window.speechSynthesis.speak(utterance);
+                  sessionStorage.setItem('success_message', message);
+                  navigate('/department-selection');
                 } else {
                   const errorMessage = "No student found with these details";
-                  setOutputText(errorMessage);
-                  const utterance = new SpeechSynthesisUtterance(errorMessage);
-                  utterance.lang = 'en-UK';
-                  utterance.rate = 0.9;
-                  window.speechSynthesis.speak(utterance);
+                  sessionStorage.setItem('error_message', errorMessage);
+                  navigate('/');
                 }
               }
             } catch (error) {
               console.error('Error processing department/year:', error);
               const errorMessage = "Please, provide a valid input";
-              setOutputText(errorMessage);
-              const utterance = new SpeechSynthesisUtterance(errorMessage);
-              utterance.lang = 'en-UK';
-              utterance.rate = 0.9;
-              window.speechSynthesis.speak(utterance);
-              
-              setTimeout(() => {
-                navigate('/');
-              }, 5000);
+              sessionStorage.setItem('error_message', errorMessage);
+              navigate('/');
             }
           }
         }, 3000);

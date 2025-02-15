@@ -1,8 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [currentSection, setCurrentSection] = useState('homepage');
@@ -12,11 +12,20 @@ const Index = () => {
   const [showCards, setShowCards] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
+    const errorMessage = sessionStorage.getItem('error_message');
+    if (errorMessage) {
+      const utterance = new SpeechSynthesisUtterance(errorMessage);
+      utterance.lang = 'en-UK';
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+      sessionStorage.removeItem('error_message');
+    }
+
     const text = "I'm Eva, a virtual voice assistant!!";
     let index = 0;
-    
+
     // Text-to-speech
     const utterance = new SpeechSynthesisUtterance("I am Eva, a virtual voice assistant");
     utterance.lang = 'en-UK';
@@ -76,12 +85,12 @@ const Index = () => {
           </div>
           {showButton && (
             <div className="text-center pb-8">
-              <button
+              <Button
                 onClick={handleGetStarted}
                 className="bg-[#1D4ED8] text-white px-16 py-4 rounded-full text-xl pop-up hover:bg-blue-700 transition-colors"
               >
                 Get Started
-              </button>
+              </Button>
             </div>
           )}
         </div>
