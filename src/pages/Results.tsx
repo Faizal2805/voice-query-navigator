@@ -23,6 +23,9 @@ const Results = () => {
   console.log(sessionStorage.getItem('extractedDepartment'));
   console.log(sessionStorage.getItem('extractedYear'));
   console.log("Debug: Component Rendered!");
+  alert("Results Page Loaded!");
+  console.log("✅ Results Page Rendered");
+
 
 
   // Map extractedYear to match JSON format
