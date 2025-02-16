@@ -31,9 +31,9 @@ const ResultsPage = ({ studentsList, department, year }) => {
               className="p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300"
             >
               <h2 className="text-xl font-bold text-blue-600">{student.name}</h2>
-              <p className="text-gray-700">Block: {student.block}</p>
-              <p className="text-gray-700">Floor: {student.floor}</p>
-              <p className="text-gray-700">Room No: {student.room_no}</p>
+              <p className="text-gray-700">Block: {student.block || "N/A"}</p>
+              <p className="text-gray-700">Floor: {student.floor || "N/A"}</p>
+              <p className="text-gray-700">Room No: {student.room_no || "N/A"}</p>
             </div>
           ))
         ) : (
