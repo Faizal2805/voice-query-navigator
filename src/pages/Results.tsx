@@ -49,7 +49,7 @@ const Results = () => {
     if (filteredResults.length === 0) {
       text = "No Student Found...";
     } else if (filteredResults.length === 1) {
-      text = `${filteredResults[0].name} is available at ${filteredResults[0].block} - Block, ${filteredResults[0].floor} Floor and Room No : ${filteredResults[0].room_no}`;
+      text = sessionStorage.getItem('studentsList');
     } else {
       text = filteredResults.map((student: any) => 
         `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`
