@@ -48,6 +48,7 @@ const DepartmentSelection = () => {
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
 
+    // Redirect to loading page first
     navigate('/details-fetching');
     
     try {
@@ -69,23 +70,25 @@ const DepartmentSelection = () => {
       if (!data || data.error) {
         navigate('/error', { state: { returnPath: '/department-selection' } });
       } else {
+        // Get stored student data
         const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
         const mappedYear = yearMapping[data.year] || data.year;
         
+        // Filter students based on department and year
         const filteredStudents = studentsList.filter((student: any) => 
           student.department.toLowerCase() === data.department.toLowerCase() &&
           student.year === mappedYear
         );
 
         if (filteredStudents.length > 0) {
-          // Display results for all matching students
+          // Format results into cards
           let message = '';
           if (filteredStudents.length === 1) {
             const student = filteredStudents[0];
-            message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`;
+            message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`;
           } else {
             message = filteredStudents.map((student: any) => 
-              `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room-No: ${student.room_no}.`
+              `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`
             ).join('\n');
           }
           displayCharacterByCharacter(message);
@@ -133,6 +136,7 @@ const DepartmentSelection = () => {
               className="shadow-lg rounded-lg text-lg py-6"
             />
             <Button
+              id="searchDeptYearBtn"
               onClick={handleSearch}
               className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6"
             >

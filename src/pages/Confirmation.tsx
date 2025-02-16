@@ -40,6 +40,7 @@ const Confirmation = () => {
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
 
+    // Redirect to loading page first
     navigate('/details-fetching');
     
     try {
@@ -56,6 +57,7 @@ const Confirmation = () => {
       if (data.length === 0) {
         navigate('/error', { state: { returnPath: '/confirmation' } });
       } else {
+        // Store the complete student data
         sessionStorage.setItem('studentsList', JSON.stringify(data));
         navigate('/department-selection');
       }
@@ -81,6 +83,7 @@ const Confirmation = () => {
             className="shadow-lg rounded-lg text-lg py-6"
           />
           <Button
+            id="searchNameBtn"
             onClick={handleSearch}
             className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6"
           >
