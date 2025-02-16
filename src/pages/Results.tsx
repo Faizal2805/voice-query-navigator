@@ -19,6 +19,10 @@ const Results = () => {
   console.log("Extracted Department:", extractedDepartment); // ✅ Debug: Check extracted department
   console.log("Extracted Year:", extractedYear); // ✅ Debug: Check extracted year
 
+  console.log(sessionStorage.getItem('studentsList'));
+  console.log(sessionStorage.getItem('extractedDepartment'));
+  console.log(sessionStorage.getItem('extractedYear'));
+
   // Map extractedYear to match JSON format
   const yearMapping: Record<string, string> = {
     'I': 'FIRSTYEAR',
