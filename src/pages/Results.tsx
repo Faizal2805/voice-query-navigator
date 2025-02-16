@@ -47,10 +47,7 @@ const Results = () => {
   sessionStorage.setItem('filteredResults', JSON.stringify(filteredResults));
   console.log("Filtered Results:", filteredResults); // ✅ Debug: Check final filtered data
 
-  useEffect(() => {useEffect(() => {
-  console.log("🚀 Running useEffect - Checking Filtered Results");
-  console.log("Filtered Results:", filteredResults);
-
+  useEffect(() => {
   let text = "No Student Found...";  // Default message
 
   if (filteredResults.length === 1) {
@@ -64,19 +61,23 @@ const Results = () => {
 
   console.log("✅ Final Text to Display:", text);
 
-  let index = 0;
-  setDisplayedText(""); // Reset text before animation
-  const interval = setInterval(() => {
-    if (index <= text.length) {
-      setDisplayedText(text.slice(0, index));
-      index++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 70);
-
-  return () => clearInterval(interval);
-}, [filteredResults, studentsList, extractedDepartment, extractedYear]);  // 🔥 Ensure effect re-runs!
+  if (filteredResults.length === 0) {
+    setDisplayedText(text); // 🔥 Instantly update UI for "No Student Found..."
+  } else {
+    let index = 0;
+    setDisplayedText(""); // Reset text before animation
+    const interval = setInterval(() => {
+      if (index <= text.length) {
+        setDisplayedText(text.slice(0, index));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 70);
+  
+    return () => clearInterval(interval);
+  }
+}, [filteredResults, studentsList, extractedDepartment, extractedYear]);
 
 
   return (
