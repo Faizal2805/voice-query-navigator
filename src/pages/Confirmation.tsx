@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -57,6 +58,14 @@ const Confirmation = () => {
         },
         body: JSON.stringify({ text: searchInput }),
       });
+
+      if (!response.ok) {
+        // If it's a 404 error, navigate to error page
+        if (response.status === 404) {
+          navigate('/error', { state: { returnPath: '/confirmation' } });
+          return;
+        }
+      }
 
       const data = await response.json();
       
