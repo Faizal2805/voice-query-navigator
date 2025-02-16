@@ -12,7 +12,7 @@ const Confirmation = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const text = "Kindly tell the full name of the person you are looking for...";
+    const text = "Make sure you don't misspell the name...";
     let index = 0;
     
     // Text-to-speech
