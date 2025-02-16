@@ -39,17 +39,32 @@ const Results = () => {
   }, [filteredResults]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center space-y-4 p-4">
-      {displayedTexts.map((text, index) => (
-        <Card key={index} className="w-full max-w-md p-4 text-center shadow-lg rounded-lg">
-          <p className="text-lg font-semibold text-gray-800">{text}</p>
-        </Card>
-      ))}
-      <Button onClick={() => navigate('/')} className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-        OK
-      </Button>
-    </div>
-  );
-};
+  <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    {/* Display filtered results */}
+    {filteredResults.length > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredResults.map((student, index) => (
+          <Card key={index} className="p-4 shadow-lg rounded-lg bg-white">
+            <h2 className="text-xl font-bold">{student.name}</h2>
+            <p className="text-gray-600">
+              Available at {student.block}, Room No: {student.room_no}
+            </p>
+          </Card>
+        ))}
+      </div>
+    ) : (
+      <p className="text-2xl font-bold">No Student Found...</p>
+    )}
+
+    {/* OK Button */}
+    <button
+      onClick={() => navigate('/')}
+      className="mt-8 bg-blue-600 text-white px-6 py-2 rounded-lg"
+    >
+      OK
+    </button>
+  </div>
+);
+
 
 export default Results;
