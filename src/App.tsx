@@ -30,7 +30,6 @@ const App = () => (
           <Route path="/details-fetching" element={<DetailsFetching />} />
           <Route path="/department-selection" element={<DepartmentSelection />} />
           <Route path="/error" element={<ErrorPage />} />
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
