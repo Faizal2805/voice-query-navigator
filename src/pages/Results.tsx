@@ -22,6 +22,8 @@ const Results = () => {
   console.log(sessionStorage.getItem('studentsList'));
   console.log(sessionStorage.getItem('extractedDepartment'));
   console.log(sessionStorage.getItem('extractedYear'));
+  console.log("Debug: Component Rendered!");
+
 
   // Map extractedYear to match JSON format
   const yearMapping: Record<string, string> = {
