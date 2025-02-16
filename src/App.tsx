@@ -10,7 +10,6 @@ import Confirmation from "./pages/Confirmation";
 import DetailsFetching from "./pages/DetailsFetching";
 import DepartmentSelection from "./pages/DepartmentSelection";
 import ErrorPage from "./pages/ErrorPage";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
