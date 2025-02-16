@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +29,13 @@ const Confirmation = () => {
         clearInterval(interval);
       }
     }, 70);
+
+    // Get the spoken text from storage if it exists
+    const spokenText = sessionStorage.getItem('spokenText');
+    if (spokenText) {
+      setSearchInput(spokenText);
+      sessionStorage.removeItem('spokenText'); // Clear it after use
+    }
 
     return () => {
       clearInterval(interval);

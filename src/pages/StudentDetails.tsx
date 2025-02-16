@@ -15,7 +15,7 @@ const StudentDetails = () => {
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const text = "Who are you looking for?";
+    const text = "Make sure that you don't misspell the name...";
     let index = 0;
     
     // Text-to-speech
@@ -89,6 +89,7 @@ const StudentDetails = () => {
           if (recognitionRef.current) {
             recognitionRef.current.stop();
             setIsListening(false);
+            sessionStorage.setItem('spokenText', transcript);
             navigate('/confirmation');
           }
         }, 3000);
@@ -141,28 +142,7 @@ const StudentDetails = () => {
             >
               <ArrowLeft size={32} />
             </button>
-            <button 
-              onClick={() => setShowKeyboard(!showKeyboard)}
-              className="border-0 bg-white"
-            >
-              <Keyboard size={32} />
-            </button>
           </div>
-          {showKeyboard && (
-            <div className="bg-white">
-              <Input
-                type="text"
-                placeholder="Ask me anything..."
-                className="keyboard-input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setOutputText(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
-          )}
         </Card>
       </div>
     </div>

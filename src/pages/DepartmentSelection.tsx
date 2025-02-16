@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -48,7 +47,6 @@ const DepartmentSelection = () => {
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
 
-    // Redirect to loading page first
     navigate('/details-fetching');
     
     try {
@@ -60,42 +58,24 @@ const DepartmentSelection = () => {
         body: JSON.stringify({ text: searchInput }),
       });
 
-      if (response.status === 400) {
+      const data = await response.json();
+      
+      if (data.error) {
         navigate('/error', { state: { returnPath: '/department-selection' } });
         return;
       }
 
-      const data = await response.json();
+      const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+      const mappedYear = yearMapping[data.year] || data.year;
       
-      if (!data || data.error) {
-        navigate('/error', { state: { returnPath: '/department-selection' } });
-      } else {
-        // Get stored student data
-        const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
-        const mappedYear = yearMapping[data.year] || data.year;
-        
-        // Filter students based on department and year
-        const filteredStudents = studentsList.filter((student: any) => 
-          student.department.toLowerCase() === data.department.toLowerCase() &&
-          student.year === mappedYear
-        );
+      const filteredStudents = studentsList.filter((student: any) => 
+        student.department.toLowerCase() === data.department.toLowerCase() &&
+        student.year === mappedYear
+      );
 
-        if (filteredStudents.length > 0) {
-          // Format results into cards
-          let message = '';
-          if (filteredStudents.length === 1) {
-            const student = filteredStudents[0];
-            message = `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`;
-          } else {
-            message = filteredStudents.map((student: any) => 
-              `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`
-            ).join('\n');
-          }
-          displayCharacterByCharacter(message);
-        } else {
-          navigate('/error', { state: { returnPath: '/department-selection' } });
-        }
-      }
+      sessionStorage.setItem('filteredResults', JSON.stringify(filteredStudents));
+      navigate('/results');
+      
     } catch (error) {
       console.error('Error processing department/year:', error);
       navigate('/error', { state: { returnPath: '/department-selection' } });
