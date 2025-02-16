@@ -15,7 +15,7 @@ const StudentDetails = () => {
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const text = "Make sure that you don't misspell the name...";
+    const text = "Who are you looking for?";
     let index = 0;
     
     // Text-to-speech
