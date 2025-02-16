@@ -47,38 +47,37 @@ const Results = () => {
   sessionStorage.setItem('filteredResults', JSON.stringify(filteredResults));
   console.log("Filtered Results:", filteredResults); // ✅ Debug: Check final filtered data
 
-  useEffect(() => {
-    let text;
-    if (filteredResults.length === 0) {
-      text = "No Student Found...";
-    } else if (filteredResults.length === 1) {
-      text = `${filteredResults[0].name} is available at ${filteredResults[0].block} - Block, ${filteredResults[0].floor} Floor and Room No : ${filteredResults[0].room_no}`;
+  useEffect(() => {useEffect(() => {
+  console.log("🚀 Running useEffect - Checking Filtered Results");
+  console.log("Filtered Results:", filteredResults);
+
+  let text = "No Student Found...";  // Default message
+
+  if (filteredResults.length === 1) {
+    let s = filteredResults[0];
+    text = `${s.name} is available at ${s.block} - Block, ${s.floor} Floor and Room No: ${s.room_no}`;
+  } else if (filteredResults.length > 1) {
+    text = filteredResults.map((s) => 
+      `${s.name} is available at ${s.block} - Block, ${s.floor} Floor and Room No: ${s.room_no}`
+    ).join('\n');
+  }
+
+  console.log("✅ Final Text to Display:", text);
+
+  let index = 0;
+  setDisplayedText(""); // Reset text before animation
+  const interval = setInterval(() => {
+    if (index <= text.length) {
+      setDisplayedText(text.slice(0, index));
+      index++;
     } else {
-      text = filteredResults.map((student: any) => 
-        `${student.name} is available at ${student.block} - Block, ${student.floor} Floor and Room No : ${student.room_no}`
-      ).join('\n');
-    }
-
-    let index = 0;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-UK';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-
-    const interval = setInterval(() => {
-      if (index <= text.length) {
-        setDisplayedText(text.slice(0, index));
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 70);
-
-    return () => {
       clearInterval(interval);
-      window.speechSynthesis.cancel();
-    };
-  }, [filteredResults]);
+    }
+  }, 70);
+
+  return () => clearInterval(interval);
+}, [filteredResults, studentsList, extractedDepartment, extractedYear]);  // 🔥 Ensure effect re-runs!
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
