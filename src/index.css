@@ -42,11 +42,31 @@
 @keyframes popUp {
   0% {
     opacity: 0;
-    transform: scale(0);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
@@ -142,7 +162,15 @@
 }
 
 .pop-up {
-  animation: popUp 1s forwards;
+  animation: popUp 0.5s forwards;
+}
+
+.slide-up {
+  animation: slideUp 0.5s forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s forwards;
 }
 
 .glass-effect {
