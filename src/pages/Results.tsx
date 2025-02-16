@@ -1,70 +1,47 @@
-import { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from "react";
 
-const Results = () => {
-  const [displayedTexts, setDisplayedTexts] = useState<string[]>([]);
-  const navigate = useNavigate();
-
-  // Retrieve filtered results
-  const filteredResults = JSON.parse(sessionStorage.getItem('filteredResults') || '[]');
-  console.log("Filtered Results:", filteredResults); // ✅ Debug: Check final filtered data
+const ResultsPage = ({ studentsList, department, year }) => {
+  const [filteredResults, setFilteredResults] = useState([]);
 
   useEffect(() => {
-    if (filteredResults.length === 0) {
-      setDisplayedTexts(["No Student Found..."]);
-    } else {
-      let index = 0;
-      const tempTexts = new Array(filteredResults.length).fill('');
+    console.log("Retrieved studentsList:", studentsList);
+    console.log("Extracted Department:", department);
+    console.log("Mapped Year:", year);
 
-      const interval = setInterval(() => {
-        let allComplete = true;
-        filteredResults.forEach((student: any, i: number) => {
-          const fullText = `${student.name} is available at ${student.block}, Room No: ${student.room_no}`;
-          if (index <= fullText.length) {
-            tempTexts[i] = fullText.slice(0, index);
-            allComplete = false;
-          }
-        });
-        setDisplayedTexts([...tempTexts]);
-        if (allComplete) {
-          clearInterval(interval);
-        }
-        index++;
-      }, 50);
+    if (studentsList.length > 0) {
+      const filtered = studentsList.filter(
+        (student) =>
+          student.department.toLowerCase() === department.toLowerCase() &&
+          student.year.toLowerCase() === year.toLowerCase()
+      );
 
-      return () => clearInterval(interval);
+      console.log("Filtered Students:", filtered);
+      setFilteredResults(filtered);
     }
-  }, [filteredResults]);
+  }, [studentsList, department, year]);
 
   return (
-  <div className="min-h-screen flex flex-col items-center justify-center p-4">
-    {/* Display filtered results */}
-    {filteredResults.length > 0 ? (
+    <div className="p-6 bg-[#FAFAFF] min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Search Results</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredResults.map((student, index) => (
-          <Card key={index} className="p-4 shadow-lg rounded-lg bg-white">
-            <h2 className="text-xl font-bold">{student.name}</h2>
-            <p className="text-gray-600">
-              Available at {student.block}, Room No: {student.room_no}
-            </p>
-          </Card>
-        ))}
+        {filteredResults.length > 0 ? (
+          filteredResults.map((student, index) => (
+            <div
+              key={index}
+              className="p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300"
+            >
+              <h2 className="text-xl font-bold text-blue-600">{student.name}</h2>
+              <p className="text-gray-700">Block: {student.block}</p>
+              <p className="text-gray-700">Floor: {student.floor}</p>
+              <p className="text-gray-700">Room No: {student.room_no}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-red-500 font-bold text-lg">No matching student found.</p>
+        )}
       </div>
-    ) : (
-      <p className="text-2xl font-bold">No Student Found...</p>
-    )}
+    </div>
+  );
+};
 
-    {/* OK Button */}
-    <button
-      onClick={() => navigate('/')}
-      className="mt-8 bg-blue-600 text-white px-6 py-2 rounded-lg"
-    >
-      OK
-    </button>
-  </div>
-);
-
-
-export default Results;
+export default ResultsPage;
