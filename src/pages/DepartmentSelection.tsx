@@ -45,42 +45,47 @@ const DepartmentSelection = () => {
   }, []);
 
   const handleSearch = async () => {
-    if (!searchInput.trim()) return;
+  if (!searchInput.trim()) return;
 
-    navigate('/details-fetching');
-    
-    try {
-      const response = await fetch('https://extract-dept.onrender.com/extract', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: searchInput }),
-      });
+  navigate('/details-fetching'); // Show processing screen
 
-      const data = await response.json();
-      
-      if (data.error) {
-        navigate('/error', { state: { returnPath: '/department-selection' } });
-        return;
-      }
+  try {
+    const response = await fetch('https://extract-dept.onrender.com/extract', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: searchInput }),
+    });
 
-      const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
-      const mappedYear = yearMapping[data.year] || data.year;
-      
-      const filteredStudents = studentsList.filter((student: any) => 
-        student.department.toLowerCase() === data.department.toLowerCase() &&
-        student.year === mappedYear
-      );
+    const data = await response.json();
 
-      sessionStorage.setItem('filteredResults', JSON.stringify(filteredStudents));
-      navigate('/results');
-      
-    } catch (error) {
-      console.error('Error processing department/year:', error);
+    if (data.error || !data.department || !data.year) {
       navigate('/error', { state: { returnPath: '/department-selection' } });
+      return;
     }
-  };
+
+    const studentsList = JSON.parse(sessionStorage.getItem('studentsList') || '[]');
+
+    const mappedYear = yearMapping[data.year] || data.year;
+
+    // ✅ Fix: Ensure department exists before calling `.toLowerCase()`
+    const extractedDepartment = data.department ? data.department.toLowerCase() : "";
+    
+    const filteredStudents = studentsList.filter((student: any) => 
+      student.department && student.department.toLowerCase() === extractedDepartment &&
+      student.year === mappedYear
+    );
+
+    sessionStorage.setItem('filteredResults', JSON.stringify(filteredStudents));
+    navigate('/results');
+
+  } catch (error) {
+    console.error('Error processing department/year:', error);
+    navigate('/error', { state: { returnPath: '/department-selection' } });
+  }
+};
+
 
   const displayCharacterByCharacter = (message: string) => {
     let index = 0;
