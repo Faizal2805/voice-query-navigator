@@ -44,7 +44,7 @@ const ResultsPage = () => {
         style={{ animationDelay: '0.2s' }}
       >
         <p className="text-lg text-gray-600">
-          Found {results.length} {results.length === 1 ? 'result' : 'results'}
+          There are {results.length} {results.length === 1 ? 'student' : 'students'}
         </p>
       </div>
 
@@ -73,7 +73,7 @@ const ResultsPage = () => {
       {/* No Results Message */}
       {results.length === 0 && (
         <div className="text-center mt-10 animate-fade-in">
-          <p className="text-xl text-gray-500">No matching results found</p>
+          <p className="text-xl text-gray-500">Sorry, currently no student found with your specifications</p>
         </div>
       )}
 
