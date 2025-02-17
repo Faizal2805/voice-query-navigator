@@ -38,8 +38,8 @@ const ResultsPage = () => {
         className="text-center mb-6 animate-fade-in"
         style={{ animationDelay: '0.2s' }}
       >
-        <p className="text-lg text-gray-600">
-          There are {results.length} {results.length === 1 ? 'student' : 'students'} found in the name {`${student.name}
+        <p className="text-lg text-gray-700">
+          {There are {results.length} {results.length === 1 ? 'student' : 'students'} found in the name `${student.name}'}
         </p>
       </div>
 
