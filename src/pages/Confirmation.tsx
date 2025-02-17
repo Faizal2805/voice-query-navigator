@@ -100,7 +100,7 @@ const Confirmation = () => {
           <Button
             id="searchNameBtn"
             onClick={handleSearch}
-            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6 h-[60px]"
+            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6 h-[50px]"
           >
             <Search className="w-5 h-5" />
           </Button>
