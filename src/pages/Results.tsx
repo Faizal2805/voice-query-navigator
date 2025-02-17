@@ -39,7 +39,7 @@ const ResultsPage = () => {
         style={{ animationDelay: '0.2s' }}
       >
         <p className="text-lg text-gray-600">
-          There are {results.length} {results.length === 1 ? 'student' : 'students'}
+          There are {results.length} {results.length === 1 ? 'student' : 'students'} found in the name "{`${student.name}"
         </p>
       </div>
 
