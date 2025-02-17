@@ -115,19 +115,22 @@ const StudentDetails = () => {
           {displayedText}
         </p>
         <p className="text-gray-600 text-center max-w-md mb-8">{outputText}</p>
-        <button 
-          id="Start-Btn"
-          className="voice-button"
-          onClick={startListening}
-        >
-          <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
-            <div className="rainbow-container">
-              <div className="green"></div>
-              <div className="pink"></div>
-              <div className="blue"></div>
+        {/* Added mt-40 to move the button lower */}
+        <div className="mt-40">
+          <button 
+            id="Start-Btn"
+            className="voice-button"
+            onClick={startListening}
+          >
+            <div className={`rounded-full ${isListening ? 'scale-125' : ''} transition-transform`}>
+              <div className="rainbow-container">
+                <div className="green"></div>
+                <div className="pink"></div>
+                <div className="blue"></div>
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white">
