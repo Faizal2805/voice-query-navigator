@@ -33,11 +33,6 @@ const ResultsPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAFF] p-4">
-      {/* EVA Title */}
-      <div className="text-center pt-6 mb-8">
-        <h1 className="text-xl font-bold text-[#1D4ED8]">EVA</h1>
-      </div>
-
       {/* Results Count */}
       <div 
         className="text-center mb-6 animate-fade-in"
