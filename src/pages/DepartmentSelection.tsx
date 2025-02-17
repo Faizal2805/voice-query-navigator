@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +95,11 @@ const DepartmentSelection = () => {
             placeholder="Enter department and year..."
             className="shadow-lg rounded-lg text-lg py-6"
           />
-          <Button id="searchDeptYearBtn" onClick={handleSearch} className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6">
+          <Button 
+            id="searchDeptYearBtn" 
+            onClick={handleSearch} 
+            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6 h-[60px]"
+          >
             <Search className="w-5 h-5" />
           </Button>
         </div>

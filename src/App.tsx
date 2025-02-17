@@ -10,6 +10,7 @@ import Confirmation from "./pages/Confirmation";
 import DetailsFetching from "./pages/DetailsFetching";
 import DepartmentSelection from "./pages/DepartmentSelection";
 import ErrorPage from "./pages/ErrorPage";
+import NameError from "./pages/NameError";
 import ResultsPage from "./pages/Results";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/details-fetching" element={<DetailsFetching />} />
           <Route path="/department-selection" element={<DepartmentSelection />} />
           <Route path="/error" element={<ErrorPage />} />
+          <Route path="/name-error" element={<NameError />} />
           <Route path="/results" element={<ResultsPage />} />
         </Routes>
       </BrowserRouter>

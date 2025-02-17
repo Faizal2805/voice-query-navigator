@@ -60,9 +60,9 @@ const Confirmation = () => {
       });
 
       if (!response.ok) {
-        // If it's a 404 error, navigate to error page
+        // If it's a 404 error, navigate to name-error page
         if (response.status === 404) {
-          navigate('/error', { state: { returnPath: '/confirmation' } });
+          navigate('/name-error', { state: { returnPath: '/confirmation' } });
           return;
         }
       }
@@ -70,7 +70,7 @@ const Confirmation = () => {
       const data = await response.json();
       
       if (data.length === 0) {
-        navigate('/error', { state: { returnPath: '/confirmation' } });
+        navigate('/name-error', { state: { returnPath: '/confirmation' } });
       } else {
         // Store the complete student data
         sessionStorage.setItem('studentsList', JSON.stringify(data));
@@ -78,7 +78,7 @@ const Confirmation = () => {
       }
     } catch (error) {
       console.error('Error processing search:', error);
-      navigate('/error', { state: { returnPath: '/confirmation' } });
+      navigate('/name-error', { state: { returnPath: '/confirmation' } });
     }
   };
 
@@ -100,7 +100,7 @@ const Confirmation = () => {
           <Button
             id="searchNameBtn"
             onClick={handleSearch}
-            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6"
+            className="bg-[#1D4ED8] hover:bg-[#1e40af] px-6 h-[60px]"
           >
             <Search className="w-5 h-5" />
           </Button>
