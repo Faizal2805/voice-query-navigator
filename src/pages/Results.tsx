@@ -55,14 +55,12 @@ const ResultsPage = () => {
             key={index}
             className="transform transition-all duration-500"
             style={{
-              animation: 'popUp 0.5s ease-out forwards',
-              animationDelay: `${index * 0.2}s`,
-              opacity: 0,
-              transform: 'translateY(20px)'
+              animation: 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              animationDelay: `${index * 0.2}s`
             }}
           >
             <Card className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-              <p className="text-lg text-gray-800 leading-relaxed">
+              <p className="text-lg font-medium text-gray-800 leading-relaxed">
                 {`${student.name} is available at ${student.block}-Block, ${student.floor} Floor and Room No: ${student.room_no}`}
               </p>
             </Card>
